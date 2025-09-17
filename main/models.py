@@ -19,7 +19,6 @@ class Item(models.Model):
     is_featured = models.BooleanField(default=False)       
     stock = models.PositiveIntegerField(default=0)
     brand = models.CharField(max_length=50, blank=True, null=True)
-    views = models.PositiveIntegerField(default=0)
 
 
     def __str__(self):
