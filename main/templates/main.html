@@ -2,17 +2,41 @@
 
 <h5>Name: </h5>
 <p>{{ name }}</p> 
-<h5>Price:  </h5>
-<p>{{ price }}</p> 
-<h5>Description: </h5>
-<p>{{ description }}</p> 
-<h5>Thumbnail:  </h5>
-<img src="{{ thumbnail }}" alt="Thumbnail">
-<h5>Category:  </h5>
-<p>{{ category }}</p>
-<h5>Is featured? :  </h5>
-<p>{{ is_featured}}</p>
-<h5>Stock:  </h5>
-<p>{{ stock }}</p>
-<h5>Brand:  </h5>
-<p>{{ brand }}</p>
+
+<a href="{% url 'main:create_items' %}">
+  <button>+ Add Item</button>
+</a>
+
+<hr>
+
+{% if not items_list %}
+<p>Belum ada data item produk pada NewGames Shop.</p>
+{% else %}
+
+{% for items in items_list %}
+<div>
+  <h2><a href="{% url 'main:show_items' items.id %}">{{ items.name }}</a></h2>
+
+  <p><b>{{ items.get_category_display }}</b>{% if items.is_featured %} | 
+    <b>Featured</b>{% endif %}{% if items.is_items_hot %} | 
+    <b>Hot</b>{% endif %} | <i>{{ items.created_at|date:"d M Y H:i" }}</i> 
+    | Views: {{ items.items_views }}</p>
+
+  {% if items.thumbnail %}
+  <img src="{{ items.thumbnail }}" alt="thumbnail" width="150" height="100">
+  <br />
+  {% endif %}
+
+  <p>{{ items.content|truncatewords:25 }}...</p>
+
+  <p><a href="{% url 'main:show_items' items.id %}"><button>Details</button></a>
+  </a>
+  <a href="{% url 'main:delete_item' items.id %}" onclick="return confirm('Yakin mau hapus item ini?')">
+    <button>Delete</button>
+  </a></p>
+</div>
+
+<hr>
+{% endfor %}
+
+{% endif %}

@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block content %}
+<p><a href="{% url 'main:show_main' %}"><button>← Back to Items List</button></a></p>
+
+<h1>{{ items.title }}</h1>
+<p><b>{{ items.get_category_display }}</b>{% if items.is_featured %} | 
+    <b>Featured</b>{% endif %}{% if items.is_items_hot %} | 
+    <b>Hot</b>{% endif %} | <i>{{ items.created_at|date:"d M Y, H:i" }}</i> 
+    | Views: {{ items.items_views }}</p>
+
+{% if items.thumbnail %}
+<img src="{{ items.thumbnail }}" alt="Items thumbnail" width="300">
+<br /><br />
+{% endif %}
+
+<p>{{ items.content }}</p>
+
+{% endblock content %}
