@@ -1,41 +1,176 @@
-<h1>NewGames Shop</h1>
+{% extends "base.html" %}
 
-<h5>Name: </h5>
-<p>{{ name }}</p> 
+{% block title %}Selamat Berbelanja di NewGames Shop{% endblock %}
 
-<a href="{% url 'main:create_items' %}">
-  <button>+ Add Item</button>
-</a>
+{% block content %}
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+    background: #fafafa;
+  }
 
-<hr>
+  h1 {
+    margin-bottom: 10px;
+  }
+
+  button {
+    margin-right: 5px;
+    margin-bottom: 5px;
+  }
+
+  .container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); /* kartu lebih lebar */
+    gap: 20px;
+    margin-top: 20px;
+  }
+
+  .card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fff;
+    padding: 15px;
+    text-align: left;
+    position: relative;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
+  }
+
+  .card:hover {
+    transform: translateY(-5px);
+  }
+
+  .product-image {
+    position: relative;
+    margin-bottom: 10px;
+  }
+
+  .product-image img {
+    width: 100%;
+    height: 180px;
+    object-fit: contain;
+    border-radius: 6px;
+    background: #f9f9f9;
+  }
+
+  .badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    padding: 5px 10px;
+    font-size: 12px;
+    font-weight: bold;
+    border-radius: 4px;
+    color: #fff;
+  }
+
+  .badge-sale { background-color:#e53935; }
+  .badge-featured { background-color: #43a047; }
+
+  .product-name {
+    font-size: 18px;
+    font-weight: bold;
+    color: #000; 
+    margin-bottom: 4px;
+
+    white-space: nowrap;      
+    overflow: hidden;          
+    text-overflow: ellipsis;
+  }
+
+  .brand {
+    font-size: 14px;
+    color: #777;
+    margin-bottom: 8px;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .price {
+    font-size: 16px;
+    font-weight: bold;
+    color: #000;
+  }
+
+  .old-price {
+    text-decoration: line-through;
+    color: #888;
+    font-size: 14px;
+    margin-left: 5px;
+  }
+
+  .btn {
+    margin-top: 10px;
+    background: #1976d2;
+    color: #fff;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+
+  .btn:hover {
+    background: #1565c0;
+  }
+</style>
+  <h1>NewGames Shop</h1>
+  <hr>
+  <h3>Halo, {{ name }}!</h3>
+
+  <a href="{% url 'main:create_items' %}">
+    <button>+ Add Product</button>
+  </a>
+  <a href="{% url 'main:logout' %}">
+    <button>Logout</button>
+  </a>
+  <h5>Sesi terakhir login: {{ last_login }}</h5>
+  <hr>
+
+  <a href="?filter=all"><button>All Products</button></a>
+  <a href="?filter=my"><button>My Products</button></a> 
 
 {% if not items_list %}
-<p>Belum ada data item produk pada NewGames Shop.</p>
-{% else %}
+    <p>Belum ada data produk yang dijual di NewGames Shop.</p>
+  {% else %}
+    <div class="container">
+      {% for items in items_list %}
+      <div class="card">
+        <div class="product-image">
+          {% if items.thumbnail %}
+            <img src="{{ items.thumbnail }}" alt="{{ items.name }}">
+          {% endif %}
+          {% if items.is_on_sale %}
+            <span class="badge badge-sale">SALE</span>
+          {% endif %}
+          {% if items.is_featured %}
+            <span class="badge badge-featured">UNGGULAN</span>
+          {% endif %}
+        </div>
 
-{% for items in items_list %}
-<div>
-  <h2><a href="{% url 'main:show_items' items.id %}">{{ items.name }}</a></h2>
+        <div class="product-name">{{ items.name }}</div>
 
-  <p><b>{{ items.get_category_display }}</b>{% if items.is_featured %} | 
-    <b>Featured</b>{% endif %}{% if items.is_items_hot %} | 
-    <b>Hot</b>{% endif %} | <i>{{ items.created_at|date:"d M Y H:i" }}</i> 
+        <div class="brand">{{ items.brand }}</div>
 
-  {% if items.thumbnail %}
-  <img src="{{ items.thumbnail }}" alt="thumbnail" width="150" height="100">
-  <br />
-  {% endif %}
+        <div>
+          <span class="price">
+            Rp {{ items.sale_price|default:items.price }}
+          </span>
+          {% if items.is_on_sale %}
+            <span class="old-price">Rp {{ items.price }}</span>
+          {% endif %}
+        </div>
 
-  <p>{{ items.description|truncatewords:25 }}...</p>
-
-  <p><a href="{% url 'main:show_items' items.id %}"><button>Details</button></a>
-  </a>
-  <a href="{% url 'main:delete_item' items.id %}" onclick="return confirm('Yakin mau hapus item ini?')">
-    <button>Delete</button>
-  </a></p>
-</div>
-
-<hr>
-{% endfor %}
-
+        <p>
+          <a href="{% url 'main:show_items' items.id %}">
+            <button class="btn">Details</button>
+          </a>
+        </p>
+      </div>
+    {% endfor %}
+  </div>
 {% endif %}
+{% endblock content %}
