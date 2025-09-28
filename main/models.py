@@ -12,7 +12,7 @@ class Item(models.Model):
         ('kesehatan dan kebugaran', 'Kesehatan dan Kebugaran'),
         ('bola', 'Bola'),
     ]
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    id = models.UUIDField(primary_key=True, default=uuid.uuid, editable=False)
     name = models.CharField(max_length=100)                
     price = models.IntegerField()
     sale_price = models.IntegerField(blank=True, null=True)                      

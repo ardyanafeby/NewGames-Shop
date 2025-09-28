@@ -1,7 +1,10 @@
 from main.views import register
+from main.views import edit_items
 from main.views import login_user
 from main.views import logout_user
 from django.urls import path
+from main.views import delete_items
+from main.views import aku_cinta
 from main import views
 from main.views import show_main, create_items, show_items, show_xml, show_json, show_json_by_id, show_xml_by_id
 
@@ -18,4 +21,6 @@ urlpatterns = [
     path('register/', register, name='register'),
     path('login/', login_user, name='login'),
     path('logout/', logout_user, name='logout'),
+    path('news/<uuid:id>/edit', edit_items, name='edit_items'),
+    path('news/<uuid:id>/delete', delete_items, name='delete_items'),
 ]

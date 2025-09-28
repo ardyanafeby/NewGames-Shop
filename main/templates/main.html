@@ -1,176 +1,57 @@
 {% extends "base.html" %}
+{% load static %}
 
-{% block title %}Selamat Berbelanja di NewGames Shop{% endblock %}
+{% block meta %}
+<title>NewGames Shop</title>
+{% endblock meta %}
 
 {% block content %}
-<style>
-  body {
-    font-family: Arial, sans-serif;
-    margin: 20px;
-    background: #fafafa;
-  }
+{% include 'navbar.html' %}
+<div class="bg-gray-50 w-full pt-16 min-h-screen">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-  h1 {
-    margin-bottom: 10px;
-  }
+    <!-- Header Section -->
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 mb-2">Latest Product Items</h1>
+      <p class="text-gray-600">Stay updated with the latest discount and promos</p>
+    </div>
 
-  button {
-    margin-right: 5px;
-    margin-bottom: 5px;
-  }
-
-  .container {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); /* kartu lebih lebar */
-    gap: 20px;
-    margin-top: 20px;
-  }
-
-  .card {
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    background: #fff;
-    padding: 15px;
-    text-align: left;
-    position: relative;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    transition: transform 0.2s;
-  }
-
-  .card:hover {
-    transform: translateY(-5px);
-  }
-
-  .product-image {
-    position: relative;
-    margin-bottom: 10px;
-  }
-
-  .product-image img {
-    width: 100%;
-    height: 180px;
-    object-fit: contain;
-    border-radius: 6px;
-    background: #f9f9f9;
-  }
-
-  .badge {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    padding: 5px 10px;
-    font-size: 12px;
-    font-weight: bold;
-    border-radius: 4px;
-    color: #fff;
-  }
-
-  .badge-sale { background-color:#e53935; }
-  .badge-featured { background-color: #43a047; }
-
-  .product-name {
-    font-size: 18px;
-    font-weight: bold;
-    color: #000; 
-    margin-bottom: 4px;
-
-    white-space: nowrap;      
-    overflow: hidden;          
-    text-overflow: ellipsis;
-  }
-
-  .brand {
-    font-size: 14px;
-    color: #777;
-    margin-bottom: 8px;
-
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .price {
-    font-size: 16px;
-    font-weight: bold;
-    color: #000;
-  }
-
-  .old-price {
-    text-decoration: line-through;
-    color: #888;
-    font-size: 14px;
-    margin-left: 5px;
-  }
-
-  .btn {
-    margin-top: 10px;
-    background: #1976d2;
-    color: #fff;
-    border: none;
-    padding: 8px 12px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-  }
-
-  .btn:hover {
-    background: #1565c0;
-  }
-</style>
-  <h1>NewGames Shop</h1>
-  <hr>
-  <h3>Halo, {{ name }}!</h3>
-
-  <a href="{% url 'main:create_items' %}">
-    <button>+ Add Product</button>
-  </a>
-  <a href="{% url 'main:logout' %}">
-    <button>Logout</button>
-  </a>
-  <h5>Sesi terakhir login: {{ last_login }}</h5>
-  <hr>
-
-  <a href="?filter=all"><button>All Products</button></a>
-  <a href="?filter=my"><button>My Products</button></a> 
-
-{% if not items_list %}
-    <p>Belum ada data produk yang dijual di NewGames Shop.</p>
-  {% else %}
-    <div class="container">
-      {% for items in items_list %}
-      <div class="card">
-        <div class="product-image">
-          {% if items.thumbnail %}
-            <img src="{{ items.thumbnail }}" alt="{{ items.name }}">
-          {% endif %}
-          {% if items.is_on_sale %}
-            <span class="badge badge-sale">SALE</span>
-          {% endif %}
-          {% if items.is_featured %}
-            <span class="badge badge-featured">UNGGULAN</span>
-          {% endif %}
-        </div>
-
-        <div class="product-name">{{ items.name }}</div>
-
-        <div class="brand">{{ items.brand }}</div>
-
-        <div>
-          <span class="price">
-            Rp {{ items.sale_price|default:items.price }}
-          </span>
-          {% if items.is_on_sale %}
-            <span class="old-price">Rp {{ items.price }}</span>
-          {% endif %}
-        </div>
-
-        <p>
-          <a href="{% url 'main:show_items' items.id %}">
-            <button class="btn">Details</button>
-          </a>
-        </p>
+    <!-- Filter Section -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 bg-white rounded-lg border border-gray-200 p-4">
+      <div class="flex space-x-3 mb-4 sm:mb-0">
+        <a href="?" class="{% if request.GET.filter == 'all' or not request.GET.filter  %} bg-green-600 text-white{% else %}bg-white text-gray-700 border border-gray-300{% endif %} px-4 py-2 rounded-md font-medium transition-colors hover:bg-green-600 hover:text-white">
+          All Products
+        </a>
+        <a href="?filter=my" class="{% if request.GET.filter == 'my' %} bg-green-600 text-white{% else %}bg-white text-gray-700 border border-gray-300{% endif %} px-4 py-2 rounded-md font-medium transition-colors hover:bg-green-600 hover:text-white">
+          My Products
+        </a>
       </div>
-    {% endfor %}
+      {% if user.is_authenticated %}
+        <div class="text-sm text-gray-500">
+          Last login: {{ last_login }}
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- News Grid -->
+    {% if not items_list %}
+      <div class="bg-white rounded-lg border border-gray-200 p-12 text-center">
+        <div class="w-32 h-32 mx-auto mb-4">
+          <img src="{% static 'image/no-items.png' %}" alt="No items available" class="w-full h-full object-contain">
+        </div>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">No products found</h3>
+        <p class="text-gray-500 mb-6">Let's sell your product and get some money!</p>
+        <a href="{% url 'main:create_items' %}" class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors">
+          Create Product
+        </a>
+      </div>
+    {% else %}
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for items in items_list %}
+          {% include 'card_items.html' with items=items %}
+        {% endfor %}
+      </div>
+    {% endif %}
   </div>
-{% endif %}
+</div>
 {% endblock content %}

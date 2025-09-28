@@ -12,6 +12,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from main.forms import ItemForm
 from main.models import Item
 
+
 # Create your views here.
 
 @login_required(login_url='/login')
@@ -24,7 +25,8 @@ def show_main(request):
         items_list = Item.objects.filter(user=request.user)
 
     context = {
-        'name' : request.user.username,
+        'name' : "Ardyana Feby Pratiwi",
+        'kelas' : "PBP A",
         'items_list' : items_list,
         'last_login': request.COOKIES.get('last_login', 'Never')
     }
@@ -114,3 +116,21 @@ def logout_user(request):
     response = HttpResponseRedirect(reverse('main:login'))
     response.delete_cookie('last_login')
     return response
+
+def edit_items(request, id):
+    news = get_object_or_404(Item, pk=id)
+    form = ItemForm(request.POST or None, instance=news)
+    if form.is_valid() and request.method == 'POST':
+        form.save()
+        return redirect('main:show_main')
+
+    context = {
+        'form': form
+    }
+
+    return render(request, "edit_items.html", context)
+
+def delete_items(request, id):
+    news = get_object_or_404(Item, pk=id)
+    news.delete()
+    return HttpResponseRedirect(reverse('main:show_main'))
