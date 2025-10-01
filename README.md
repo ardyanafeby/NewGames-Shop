@@ -29,6 +29,12 @@ CSRF token untuk mencegah adanya Cross-Site Request Forgery, yaitu pihak ketiga 
 
 Langkah pertama saya buat model, model ini sebagai representasi“bentuk data” yang ingin disimpan ke database. Model ini yang nanti akan almemastikan bahwa data yang tersimpan memiliki format dan atribut yang sesuai, seperti nama, harga, deskripsi, dll. Selanjutnya membuat form di direktori main. Dengan form ini, user bisa memasukkan data lewat halaman web. Nah, form ini juga sekalian ngecek validasi supaya data yang masuk benar (misalnya harga angka, bukan huruf). Selanjutnya di views.py saya menambahkan beberapa fungsi sebagai penghubung model, form, dan template. Di sini saya membuat fungsi untuk menampilkan daftar item, menambahkan data baru, menampilkan detail, dsb. Setelah views selesai, setiap fungsi perlu dihubungkan dengan alamat URL tertentu. Routing ini memastikan bahwa setiap permintaan pengguna diarahkan ke fungsi yang sesuai. Selanjutnya supaya lebih menarik dan informatis tampilannya di halaman html (main.html), saya menambahkan tombol "Add" dan "Details untuk melihat detail produk yang ingin diklik. Setelah itu saya akses local host dengan /xml/ dan /json/ untuk mengecek di POstman, apakah datanya sudah keluar dengan format benar atau belum.
 
+### XML
+![xml](main/postman/xml.png)
+
+### JSON
+![json](main/postman/json.png)
+
 </details>
 <details>
 <summary> Tugas 4 </summary>
@@ -54,4 +60,49 @@ Tidak aman 100%, karena cookie sebenarnya data yang dikirim bolak balik dari bro
 
 Step lanjutan dari tugas sebelumnya, pertama-tama saya menambahkan path di urls.py dan method di views.py berupa login, logout, dan register. Saya mengimplementasikan AuthenticationForm di method login, logout, dan register yang diisikan di views.py. Tidak lupa saya kelompokkan otorisasi pengguna dengan menghubungkan user dan productnya dengan mmenambahkan di model Item, user = ForeignKey(User,...). Tidak lupa menambahkan @login_required di atas show_items dan show_main supaya hanya orang-orang yang login dan mempunyai akun saja yang bisa melihat isi dari main page. Kemudian untuk menampilkan detail informasi pengguna yang sedang logged in, saya menambahkan 'name' : request.user.username, supaya saat mengakses itu, Django mengecek session lalu mengambil data sesuai dengan user terkait. Untuk cookies saya menambahkan di show_main 'last_login': request.COOKIES.get('last_login', 'Never') di mana cookie ini akan menampilkan kapan terakhir kaii user login, data yang diambil pun bukan merupakan data yang sensitif. </details>
 
+<details>
+<summary> Tugas 5 </summary>
+
+# TUGAS 5
+**1. Jika terdapat beberapa CSS selector untuk suatu elemen HTML, jelaskan urutan prioritas pengambilan CSS selector tersebut!**
+
+1. Inline style adalah style atribut langsung yang ada di HTML biasanya ditandai dengan **style ="..."**. Inline setelctor ini merupakan prioritas paling atas.
+2.  ID Selector ( **#id** ) seperti **#header** merupakan prioritas yang lebih tinggi dari class/attribute selector.
+3.  Class Selector termasuk attribute selector dan pseudo class( **.class**, **[attr]** , **:hover** ) merupakan prioritas yang lebih tinggi dari elemen selector/tag biasa.
+4.  Tag/Element selector (**div**, **p**, **h1**) merupakan prioritas yang paling rendah.
+   
+Biasanya juga bisa menggunakan **!important** untuk styling, di mana selalu diprioritaskan paling tinggi, melebihi Inline Style.
+
+**2. Mengapa responsive design menjadi konsep yang penting dalam pengembangan aplikasi web? Berikan contoh aplikasi yang sudah dan belum menerapkan responsive design, serta jelaskan mengapa!**
+
+Sebenarnya hal ini berkaitan dengan user experience pengguna saat menjelajahi website kita. Kita tidak bisa mengatur pengguna untuk membuka website kita di device yang spesifik, contohnya hanya bisa dibuka di browser Safari. Kita sebagai developer, baiknya memperkirakan desain yang sekiranya memberikan kenyamanan pada user. Contohnya, banyak jenis perangkat untuk mengakses website di dunia ini, desain website kita harus bisa menerapkan *responsive design* dan beradaptasi dengan perangkat-perangkat terkait. Jika seandainya tidak ada *responsive design* maka tampilan bisa pecah, teks terlalu kecil, dan tombol tidak bisa diklik sehingga tidak memberikan kenyamanan pada pengguna. Hal ini bisa menyebabkan user enggan untuk memberikan *value* pada website kita.
+
+**3.  Jelaskan perbedaan antara margin, border, dan padding, serta cara untuk mengimplementasikan ketiga hal tersebut!**
+
+Margin terletak di luar border elemen, fungsi dari margin ini adalah untuk memberikan jarak antar elemen. Sedangkan, border terletak di garis tepi elemen, fungsi dari border ini adalah untuk membatasi area ekenen, bisa juga memberikan ketebalan, warna, style seperti solid, dashed, dll. Sedangkan, padding terletak pada border elemen (di antara content & border). Fungsi dari padding adalah untuk memberikan ruang antara isi elemen, seperti teks atau gambar, dengan bagian border (tepi).
+
+**Contoh penggunaan :**
+
+Saya ambil dari global.css
+
+<pre>.form-style input[type="checkbox"]
+{
+    width: 1.25rem;           //lebar checkbox
+    height: 1.25rem;          // tinggi checkbox
+    padding: 0;               // tidak ada ruang di dalam kotak
+    border: 2px solid #d1d5db; // garis tepi checkbox warna abu-abu Tailwind (gray-300)
+}
+
+</pre>
+
+**4. Jelaskan konsep flex box dan grid layout beserta kegunaannya!**
+Flexbox adalah sistem tata letak CSS yang dirancang untuk memudahkan elemen dalam satu dimensi (horizontal atau vertikal). Flexbox biasanyab digunakan untuk menyusun item secara horizontal dan vertikal, mengatur jarak antaritem, mengatur item ke tengah baik secara horizontal ataupun vertikal, melebarkan atau mengecilkan item sesuai ruang yang tersedia. Biasanya flexbox dipakai untuk navigasi bar. Sedangakn Grid Layout adalah sistem tata letak CSS untuk dua dimensi (baris dan kolom). Penggunaan grid layout didefinisikan sebagai grid track (kolom dan baris). Biasanya digunakan untuk galeri produk dan dashboard.
+
+**5. Jelaskan bagaimana cara kamu mengimplementasikan checklist di atas secara step-by-step (bukan hanya sekadar mengikuti tutorial)!**
+
+Pertama-tama saya menggunakan framework Tailwind untuk styling CSSnya.Lalu saya pakai Tailwind di base template supaya page form/login/register/nav/card memiliki tampilan yang sama. Di html login dan register saya memakai class Tailwind untuk padding, border, color, dan hover. Begitu pula di html lain seperti main, items_detail, create_items, card_items. Saya juga membuat file global css untuk kostumisasi style. Untuk di bagian navigasi karena agak berbeda dengan tutorial, saya menambahkan tag baru yaitu <pre> < a > </ a >
+</pre> 
+untuk menambahkan kategori-kategri yang bisa diakses langsung dari navbar. Saya melakukan ini tidak hanya di desktop user, tetapi juga di bagian mobile user. 
+
+</details>
 

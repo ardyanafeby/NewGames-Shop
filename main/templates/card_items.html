@@ -1,16 +1,19 @@
 {% load static %}
-<article class="bg-white rounded-lg border border-gray-200 hover:shadow-lg transition-shadow duration-300 overflow-hidden">
+
+<article class="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-md hover:shadow-2xl 
+               transform transition duration-300 hover:scale-105">
   <!-- Thumbnail -->
-  <div class="aspect-[16/9] relative overflow-hidden">
+  <div class="relative">
     {% if items.thumbnail %}
-      <img src="{{ items.thumbnail }}" alt="{{ items.name }}" class="w-full h-full object-cover">
+      <img src="{{ items.thumbnail }}" alt="{{ items.name }}" 
+           class="w-full h-56 object-cover transition group-hover:opacity-90">
     {% else %}
-      <div class="w-full h-full bg-gray-200"></div>
+      <div class="w-full h-56 bg-gray-200"></div>
     {% endif %}
 
     <!-- Category Badge -->
     <div class="absolute top-3 left-3">
-      <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-green-600 text-white">
+      <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-600 text-white shadow">
         {{ items.get_category_display }}
       </span>
     </div>
@@ -18,12 +21,12 @@
     <!-- Status Badges -->
     <div class="absolute top-3 right-3 flex space-x-2">
       {% if items.is_featured %}
-        <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
+        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 shadow">
           Featured
         </span>
       {% endif %}
       {% if items.is_on_sale %}
-        <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-red-100 text-red-800">
+        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 shadow">
           SALE
         </span>
       {% endif %}
@@ -32,43 +35,51 @@
 
   <!-- Content -->
   <div class="p-5">
-    <div class="flex items-center text-sm text-gray-500 mb-3">
-      <time datetime="{{ items.created_at|date:'c' }}">
-        {{ items.created_at|date:"M j, Y" }}
-      </time>
-      <span class="mx-2">•</span>
-      <!-- <span>{{ news.news_views }} views</span> -->
-    </div>
-
-    <h3 class="text-lg font-semibold text-gray-900 mb-3 line-clamp-2 leading-tight">
-      <a href="{% url 'main:show_items' items.id %}" class="hover:text-green-600 transition-colors">
+    <!-- Nama produk -->
+    <h3 class="text-lg font-semibold text-gray-900 line-clamp-1 mb-1 hover:text-green-600 transition-colors">
+      <a href="{% url 'main:show_items' items.id %}">
         {{ items.name }}
       </a>
     </h3>
 
-    <p class="text-gray-600 text-sm leading-relaxed line-clamp-3 mb-4">
-      {{ items.description|truncatewords:20 }}
+    <!-- Harga -->
+    <div class="text-green-700 font-bold text-base mb-3">
+      Rp {{ items.price|floatformat:0 }}
+    </div>
+
+    <!-- Deskripsi singkat -->
+    <p class="text-gray-500 text-sm leading-snug line-clamp-2 mb-4">
+      {{ items.description|truncatewords:15 }}
     </p>
 
-    <!-- Action Buttons -->
+    <!-- Created at -->
+    <time datetime="{{ items.created_at|date:'c' }}" class="block text-xs text-gray-400 mb-4">
+      {{ items.created_at|date:"M j, Y" }}
+    </time>
+
+    <!-- Tombol aksi -->
     {% if user.is_authenticated and items.user == user %}
       <div class="flex items-center justify-between pt-4 border-t border-gray-100">
-        <a href="{% url 'main:show_items' items.id %}" class="text-green-600 hover:text-green-700 font-medium text-sm transition-colors">
-          Scroll more
+        <a href="{% url 'main:show_items' items.id %}" 
+           class="inline-block text-green-600 hover:text-green-700 font-medium text-sm">
+          Detail
         </a>
-        <div class="flex space-x-2">
-          <a href="{% url 'main:edit_items' items.id %}" class="text-gray-600 hover:text-gray-700 text-sm transition-colors">
+        <div class="flex space-x-3">
+          <a href="{% url 'main:edit_items' items.id %}" 
+             class="inline-block text-gray-500 hover:text-gray-700 text-sm">
             Edit
           </a>
-          <a href="{% url 'main:delete_items' items.id %}" class="text-red-600 hover:text-red-700 text-sm transition-colors">
-            Delete
+          <a href="{% url 'main:delete_items' items.id %}" 
+             class="inline-block text-red-600 hover:text-red-700 text-sm">
+            Hapus
           </a>
         </div>
       </div>
     {% else %}
       <div class="pt-4 border-t border-gray-100">
-        <a href="{% url 'main:show_items' items.id %}" class="text-green-600 hover:text-green-700 font-medium text-sm transition-colors">
-          Scroll more →
+        <a href="{% url 'main:show_items' items.id %}" 
+           class="inline-block text-green-600 hover:text-green-700 font-medium text-sm">
+          Detail
         </a>
       </div>
     {% endif %}
