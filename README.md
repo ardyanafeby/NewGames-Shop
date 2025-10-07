@@ -106,3 +106,23 @@ untuk menambahkan kategori-kategri yang bisa diakses langsung dari navbar. Saya 
 
 </details>
 
+<details><summary>Tugas 6</summary 
+
+# TUGAS 6
+
+
+**1.Apa perbedaan antara synchronous request dan asynchronous request?**
+Synchronus browser harus menunggu respons dari server sebelum bisa memproses hal lain. Saat request dikirim, halaman akan reload atau berpindah halaman. Sedangkan asynchronous Browser bisa mengirim request ke server tanpa perlu reload halaman. Data dikirim di belakang layar dan hasilnya bisa langsung ditampilkan di halaman yang sama.
+
+**2. Bagaimana AJAX bekerja di Django (alur request–response)?**
+Secara sederhana, alur kerja AJAX di Django berjalan seperti ini: ketika pengguna melakukan aksi di frontend, misalnya menekan tombol “Create Product”, JavaScript akan mengirimkan request (biasanya dengan metode POST atau GET) ke URL Django seperti add-item-ajax/. Setelah itu, Django akan menerima request tersebut di views.py, memproses data yang dikirim, lalu mengembalikan response dalam bentuk JSON, bukan HTML template seperti biasanya. JSON ini kemudian diterima kembali oleh JavaScript di sisi frontend, yang langsung memperbarui tampilan halaman (DOM), misalnya dengan menambahkan kartu produk baru, tanpa perlu me-reload seluruh halaman.
+
+**3. Apa keuntungan menggunakan AJAX dibandingkan render biasa di Django?**
+ Keuntungan utama dari AJAX terletak pada kecepatan, karena AJAX hanya memuat bagian data yang dibutuhkan tanpa harus merender ulang seluruh halaman, sehingga proses menjadi lebih efisien. Selain itu, AJAX juga menjadikan website lebih interaktif, di mana pengguna dapat menambah, menghapus, atau memperbarui data tanpa perlu melakukan reload halaman. Hal tersebut berpengaruh positif terhadap pengalaman pengguna (User Experience), karena interaksi terasa lebih halus dengan adanya animasi pemuatan, notifikasi toast, dan pembaruan data secara dinamis seperti pada aplikasi modern. Tidak hanya itu, penggunaan AJAX juga lebih efisien dalam penggunaan bandwidth, sebab halaman tidak perlu memuat ulang seluruh elemen setiap kali terjadi perubahan, sehingga kinerja website menjadi lebih ringan, cepat, dan responsif.
+
+**4. Bagaimana cara memastikan keamanan saat menggunakan AJAX untuk Login dan Register di Django?**
+Untuk menjaga keamanan saat menggunakan AJAX pada fitur login dan register di Django, ada beberapa langkah penting yang perlu dilakukan. Pertama, selalu gunakan CSRF Token. Django sudah menyediakan {% csrf_token %} pada form HTML untuk mencegah serangan Cross-Site Request Forgery. Saat melakukan request AJAX, token ini juga harus dikirim melalui header X-CSRFToken agar server dapat memverifikasi bahwa permintaan benar-benar berasal dari pengguna yang sah. Selain itu, pastikan aplikasi berjalan melalui HTTPS agar data sensitif seperti username dan password terenkripsi selama proses pengiriman. Kemudian, lakukan validasi data di sisi server, bukan hanya di JavaScript, untuk memastikan data yang diterima benar dan aman. Django juga sebaiknya membatasi jenis request yang diterima, misalnya hanya mengizinkan metode POST untuk proses login dan register. Terakhir, kita memanfaatkan session Django untuk menyimpan status login pengguna secara aman, sehingga sistem tetap terlindungi dari akses yang tidak sah.
+
+**5.Bagaimana AJAX mempengaruhi User Experience (UX) pada website?**
+Karena AJAX pengguna tidak perlu nunggu reload halaman tiap kali berinteraksi. Pengguna juga bisa melihat update data langsung (misalnya produk baru muncul seketika). AJAX juga dapat menampilkan loading state, toast success, atau error message tanpa keluar dari halaman. Sehingga AJAX dapat meningkatkan interaktivitas dan kenyamanan pengguna.
+</details>

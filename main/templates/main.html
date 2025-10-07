@@ -1,57 +1,332 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 {% load static %}
 
 {% block meta %}
-<title>NewGames Shop</title>
+<title>Football News</title>
 {% endblock meta %}
 
 {% block content %}
 {% include 'navbar.html' %}
-<div class="bg-gray-50 w-full pt-16 min-h-screen">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+{% include 'toast.html' %}
+{% include 'modal.html' %}
 
+<div class="bg-gray-50 w-full pt-12 min-h-screen">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <!-- Header Section -->
     <div class="mb-8">
-      <h1 class="text-3xl font-bold text-gray-900 mb-2">Latest Product Items</h1>
-      <p class="text-gray-600">Stay updated with the latest discount and promos</p>
+      <h1 class="text-3xl font-bold text-gray-900 mb-2">Fresh Football Merch</h1>
+      <p class="text-gray-600">Welcome back, {{ user.username }}!</p>
+      <p class="text-gray-600">Stay updated with the newest drops and hot discounts.</p>
+      <p class="text-lime-600">Last login: {{ last_login }}</p>
     </div>
-
-    <!-- Filter Section -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 bg-white rounded-lg border border-gray-200 p-4">
+  <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-[10px] pb-8 space-y-6">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
       <div class="flex space-x-3 mb-4 sm:mb-0">
-        <a href="?" class="{% if request.GET.filter == 'all' or not request.GET.filter  %} bg-green-600 text-white{% else %}bg-white text-gray-700 border border-gray-300{% endif %} px-4 py-2 rounded-md font-medium transition-colors hover:bg-green-600 hover:text-white">
-          All Products
-        </a>
-        <a href="?filter=my" class="{% if request.GET.filter == 'my' %} bg-green-600 text-white{% else %}bg-white text-gray-700 border border-gray-300{% endif %} px-4 py-2 rounded-md font-medium transition-colors hover:bg-green-600 hover:text-white">
-          My Products
-        </a>
+        <button id="btnAll" class="px-4 py-2 rounded-md font-medium bg-green-600 text-white">All Products</button>
+        <button id="btnMy" class="px-4 py-2 rounded-md font-medium border border-gray-300">My Products</button>
       </div>
-      {% if user.is_authenticated %}
-        <div class="text-sm text-gray-500">
-          Last login: {{ last_login }}
-        </div>
-      {% endif %}
+      <div class="flex gap-3">
+        <button id="btnCreate" class="px-4 py-2 rounded-md font-semibold bg-blue-600 text-white">➕ Upload Product</button>
+         <button id="btnRefresh" class="px-4 py-2 rounded-md font-medium border border-gray-300 hover:bg-gray-100 transition">
+      🔄 Refresh
+    </button>
+      </div>
     </div>
 
-    <!-- News Grid -->
-    {% if not items_list %}
-      <div class="bg-white rounded-lg border border-gray-200 p-12 text-center">
-        <div class="w-32 h-32 mx-auto mb-4">
-          <img src="{% static 'image/no-items.png' %}" alt="No items available" class="w-full h-full object-contain">
+    <div id="stateLoading" class="hidden bg-white border border-gray-200 rounded-lg p-12 text-center shadow-sm">
+      <div class="inline-block w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4"></div>
+      <p class="text-gray-600 font-medium">Loading products...</p>
+    </div>
+
+    <div id="stateError" class="hidden bg-white border border-red-200 rounded-lg p-8 text-center shadow-sm">
+      <p class="text-red-600 font-medium" id="errorMessage"></p>
+    </div>
+
+    <div id="stateEmpty" class="hidden bg-white border border-gray-200 rounded-lg p-12 text-center shadow-sm">
+      <h3 class="text-lg font-semibold text-gray-900 mb-2">No products found</h3>
+      <p class="text-gray-500 mb-6">Start selling your sports products today!</p>
+      <button id="btnCreateEmpty" class="px-6 py-3 bg-green-600 text-white rounded-lg">➕ Create Product</button>
+    </div>
+
+    <div id="itemsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+  </main>
+
+
+  <!-- =====================================================
+       ✅ CRUD MODAL (CREATE / UPDATE)
+  ====================================================== -->
+  <div id="crudModal" class="hidden fixed inset-0 z-50 w-full flex items-center justify-center bg-gray-900 bg-opacity-50 p-4">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between p-5 border-b bg-blue-600 text-white rounded-t-xl">
+        <h3 id="crudTitle" class="text-xl font-bold">Add New Product</h3>
+        <button onclick="hideModal()" class="hover:bg-white hover:bg-opacity-20 rounded-lg p-2">✖</button>
+      </div>
+      <form id="crudForm" class="p-6 space-y-5">
+        <input type="hidden" id="itemId">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          <div>
+            <label class="block font-semibold mb-2">Product Name *</label>
+            <input id="name" class="w-full border rounded-lg px-4 py-2.5" required>
+          </div>
+          <div>
+            <label class="block font-semibold mb-2">Brand</label>
+            <input id="brand" class="w-full border rounded-lg px-4 py-2.5">
+          </div>
+          <div>
+            <label class="block font-semibold mb-2">Price (Rp) *</label>
+            <input id="price" type="number" class="w-full border rounded-lg px-4 py-2.5" required>
+          </div>
+          <div>
+            <label class="block font-semibold mb-2">Sale Price</label>
+            <input id="sale_price" type="number" class="w-full border rounded-lg px-4 py-2.5">
+          </div>
+          <div>
+            <label class="block font-semibold mb-2">Stock *</label>
+            <input id="stock" type="number" class="w-full border rounded-lg px-4 py-2.5" value="0" required>
+          </div>
+          <div>
+            <label class="block font-semibold mb-2">Category *</label>
+            <select id="category" class="w-full border rounded-lg px-4 py-2.5">
+              <option value="fashion olahraga">Fashion Olahraga</option>
+              <option value="peralatan olahraga">Peralatan Olahraga</option>
+              <option value="suplemen olahraga">Suplemen Olahraga</option>
+              <option value="kesehatan dan kebugaran">Kesehatan dan Kebugaran</option>
+              <option value="bola">Bola</option>
+            </select>
+          </div>
+          <div class="sm:col-span-2">
+            <label class="block font-semibold mb-2">Thumbnail URL *</label>
+            <input id="thumbnail" type="url" class="w-full border rounded-lg px-4 py-2.5" required>
+          </div>
+          <div class="sm:col-span-2">
+            <label class="block font-semibold mb-2">Description *</label>
+            <textarea id="description" rows="3" class="w-full border rounded-lg px-4 py-2.5 resize-none" required></textarea>
+          </div>
         </div>
-        <h3 class="text-lg font-medium text-gray-900 mb-2">No products found</h3>
-        <p class="text-gray-500 mb-6">Let's sell your product and get some money!</p>
-        <a href="{% url 'main:create_items' %}" class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors">
-          Create Product
-        </a>
-      </div>
-    {% else %}
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {% for items in items_list %}
-          {% include 'card_items.html' with items=items %}
-        {% endfor %}
-      </div>
-    {% endif %}
+        <div>
+          <label class="inline-flex items-center gap-2 cursor-pointer">
+            <input id="is_featured" type="checkbox" class="w-5 h-5">
+            <span>⭐ Featured Product</span>
+          </label>
+        </div>
+        <div class="flex justify-end gap-3 pt-4 border-t">
+          <button type="button" onclick="hideModal()" class="px-5 py-2.5 border rounded-lg">Cancel</button>
+          <button id="crudSubmit" type="submit" class="px-5 py-2.5 bg-blue-600 text-white rounded-lg">Save</button>
+        </div>
+      </form>
+    </div>
   </div>
-</div>
-{% endblock content %}
+
+  <!-- =====================================================
+       ✅ DELETE CONFIRM MODAL
+  ====================================================== -->
+  <div id="deleteModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-50 p-4">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 text-center">
+      <h3 class="text-xl font-bold mb-3">Delete Product?</h3>
+      <p class="text-gray-600 mb-6">This action cannot be undone.</p>
+      <div class="flex justify-center gap-3">
+        <button onclick="hideDelete()" class="px-5 py-2.5 border rounded-lg">Cancel</button>
+        <button id="btnDeleteConfirm" class="px-5 py-2.5 bg-red-600 text-white rounded-lg">Yes, Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const qs = s => document.querySelector(s);
+    const show = el => el.classList.remove('hidden');
+    const hide = el => el.classList.add('hidden');
+    function getCSRFToken() {
+      for (const c of document.cookie.split(';')) {
+        const trimmed = c.trim();
+        if (trimmed.startsWith('csrftoken=')) return trimmed.substring('csrftoken='.length);
+      }
+      return '';
+    }
+
+    const grid = qs('#itemsGrid');
+    const stL = qs('#stateLoading');
+    const stE = qs('#stateError');
+    const stEmp = qs('#stateEmpty');
+    let FILTER = 'all';
+
+    async function loadItems(){
+      hide(stE); hide(stEmp); grid.innerHTML=''; show(stL);
+      try {
+        const res = await fetch(`{% url 'main:get_items_json' %}?filter=${FILTER}`);
+        if (!res.ok) throw new Error('Failed to load');
+        const data = await res.json();
+        hide(stL);
+        if (!data.items.length) return show(stEmp);
+        grid.innerHTML = data.items.map(renderCard).join('');
+      } catch(e){
+        hide(stL); show(stE);
+        qs('#errorMessage').textContent = e.message;
+      }
+    }
+
+ function renderCard(it) {
+  const discount = (it.sale_price && it.sale_price < it.price)
+    ? Math.round(((it.price - it.sale_price) / it.price) * 100)
+    : null;
+
+  // Jika stok sedikit
+  const lowStock = it.stock && it.stock < 10;
+
+  return `
+  <div class="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group">
+
+    <!-- Gambar Produk -->
+    <div class="relative cursor-pointer" onclick="openDetail('${it.id}')">
+      <img src="${it.thumbnail}" alt="${it.name}"
+           class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300">
+
+      ${discount ? `
+        <span class="absolute top-2 left-2 bg-red-600 text-white text-[11px] font-bold px-2 py-1 rounded-md shadow">
+          -${discount}%
+        </span>
+      ` : ''}
+
+      ${it.is_featured ? `
+        <span class="absolute top-2 right-2 bg-blue-600 text-white text-[11px] font-semibold px-2 py-1 rounded-md shadow">
+          FEATURED
+        </span>
+      ` : ''}
+
+      ${lowStock ? `
+        <span class="absolute bottom-2 right-2 bg-yellow-400 text-gray-900 text-[11px] font-semibold px-2 py-1 rounded-md shadow animate-pulse">
+          ⚠️ Sisa sedikit!
+        </span>
+      ` : ''}
+    </div>
+
+    <!-- Konten Produk -->
+    <div class="p-4 flex flex-col justify-between h-[235px]">
+      <div>
+        <!-- ✅ Dibuat besar dan tebal -->
+        <h3 class="text-lg sm:text-xl font-extrabold text-gray-900 line-clamp-2 group-hover:text-blue-600 transition">
+          ${it.name}
+        </h3>
+
+        ${it.sale_price && it.sale_price < it.price ? `
+          <div class="flex items-baseline gap-1 mt-1">
+            <p class="text-red-600 font-bold text-base">Rp ${it.sale_price.toLocaleString('id-ID')}</p>
+            <p class="text-gray-400 line-through text-xs">Rp ${it.price.toLocaleString('id-ID')}</p>
+          </div>
+        ` : `
+          <p class="text-green-600 font-bold text-base mt-1">Rp ${it.price.toLocaleString('id-ID')}</p>
+        `}
+
+        <p class="text-xs text-gray-500 mt-1">${it.brand || "Tanpa Brand"}</p>
+      </div>
+
+      <!-- Tombol Aksi -->
+      <div class="mt-4 flex justify-between items-center gap-2 pt-3 border-t border-gray-100">
+        <button onclick="openDetail('${it.id}')"
+          class="flex-1 inline-flex items-center justify-center gap-1 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+          Detail
+        </button>
+
+        <button onclick="openUpdate('${it.id}')"
+          class="flex-1 inline-flex items-center justify-center gap-1 px-3 py-2 text-sm font-medium text-blue-600 border border-blue-600 rounded-md hover:bg-blue-600 hover:text-white transition">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536M9 13l6.293-6.293a1 1 0 011.414 0l1.586 1.586a1 1 0 010 1.414L12 16H9v-3z" />
+          </svg>
+          Edit
+        </button>
+
+        <button onclick="openDelete('${it.id}')"
+          class="flex-1 inline-flex items-center justify-center gap-1 px-3 py-2 text-sm font-medium text-red-600 border border-red-600 rounded-md hover:bg-red-600 hover:text-white transition">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+          Delete
+        </button>
+      </div>
+    </div>
+  </div>`;
+}
+
+
+
+    // Modal Handling
+    const modal = qs('#crudModal');
+    function hideModal(){ hide(modal); }
+    function openCreate(){
+      qs('#crudTitle').textContent='Add New Product';
+      qs('#crudForm').reset();
+      qs('#itemId').value='';
+      show(modal);
+    }
+    async function openUpdate(id){
+      qs('#crudTitle').textContent='Edit Product';
+      qs('#itemId').value=id; show(modal);
+      const res = await fetch(`{% url 'main:item_detail_json' '00000000-0000-0000-0000-000000000000' %}`.replace('00000000-0000-0000-0000-000000000000', id));
+      if(res.ok){
+        const d = await res.json();
+        qs('#name').value=d.name;
+        qs('#price').value=d.price;
+        qs('#sale_price').value=d.sale_price || '';
+        qs('#category').value=d.category;
+        qs('#thumbnail').value=d.thumbnail;
+        qs('#description').value=d.description;
+        qs('#stock').value=d.stock;
+        qs('#brand').value=d.brand || '';
+        qs('#is_featured').checked=d.is_featured;
+      }
+    }
+
+    qs('#crudForm').addEventListener('submit', async e=>{
+      e.preventDefault();
+      const id = qs('#itemId').value;
+      const fd = new FormData();
+      ['name','price','sale_price','category','thumbnail','description','stock','brand'].forEach(k=>{
+        fd.append(k, qs('#'+k).value);
+      });
+      if(qs('#is_featured').checked) fd.append('is_featured','on');
+      const url = id ?
+        `{% url 'main:edit_item_ajax' '00000000-0000-0000-0000-000000000000' %}`.replace('00000000-0000-0000-0000-000000000000', id)
+        : `{% url 'main:add_item_ajax' %}`;
+      const res = await fetch(url, {method:'POST',body:fd,headers:{'X-CSRFToken':getCSRFToken()}});
+      if(res.ok){ showToast('Success','Saved','success'); hideModal(); loadItems(); }
+      else showToast('Error','Failed to save','error');
+    });
+
+    // ===== Delete =====
+    const delModal = qs('#deleteModal'); let deleteId=null;
+    function openDelete(id){ deleteId=id; show(delModal); }
+    function hideDelete(){ hide(delModal); deleteId=null; }
+    qs('#btnDeleteConfirm').addEventListener('click', async ()=>{
+      if(!deleteId) return;
+      const url=`{% url 'main:delete_item_ajax' '00000000-0000-0000-0000-000000000000' %}`.replace('00000000-0000-0000-0000-000000000000', deleteId);
+      const res=await fetch(url,{method:'POST',headers:{'X-CSRFToken':getCSRFToken()}});
+      if(res.ok){ showToast('Deleted','Item removed','success'); hideDelete(); loadItems(); }
+      else showToast('Error','Failed to delete','error');
+    });
+
+    // Buttons
+    qs('#btnAll').addEventListener('click',()=>{FILTER='all';loadItems();});
+    qs('#btnMy').addEventListener('click',()=>{FILTER='my';loadItems();});
+    qs('#btnCreate').addEventListener('click',openCreate);
+    qs('#btnCreateEmpty').addEventListener('click',openCreate);
+    qs('#btnRefresh').addEventListener('click', () => {
+  showToast('Refreshing', 'Fetching latest product data...', 'info');
+  loadItems();
+});
+
+    // Logout
+    qs('#btnLogout').addEventListener('click', async ()=>{
+      const res=await fetch(`{% url 'main:logout_ajax' %}`,{method:'POST',headers:{'X-CSRFToken':getCSRFToken()}});
+      const data=await res.json();
+      if(data.status==='success'){ showToast('Logged Out',data.message,'info'); setTimeout(()=>location.href='{% url "main:login" %}',1500);}
+    });
+
+    loadItems();
+  </script>
+  <script src="{% static 'js/toast.js' %}"></script>
+
+</body>
+{% endblock %}
