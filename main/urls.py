@@ -1,4 +1,4 @@
-from main.views import delete_item_ajax, edit_item_ajax, get_items_json, item_detail_json, login_ajax, logout_ajax, register, register_ajax
+from main.views import create_product_flutter, delete_item_ajax, edit_item_ajax, get_items_json, item_detail_json, login_ajax, logout_ajax, proxy_image, register, register_ajax
 from main.views import edit_items
 from main.views import login_user
 from main.views import logout_user
@@ -32,7 +32,8 @@ urlpatterns = [
     path('register-ajax/', register_ajax, name='register_ajax'),
     path('login-ajax/', login_ajax, name='login_ajax'),
     path('logout-ajax/', logout_ajax, name='logout_ajax'),
-
+    path('proxy-image/', proxy_image, name='proxy_image'),
+    path('create-flutter/', create_product_flutter, name='create_product_flutter'),
 
 
 
